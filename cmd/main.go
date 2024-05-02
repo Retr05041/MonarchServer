@@ -41,61 +41,10 @@ func (c *client) readFromClient() string {
 	return cleanedData
 }
 
-func (c *client) registerClient() {
-	log.Println("Entered registerClient")
-	for {
-		cmd := strings.Split(c.readFromClient(), " ")
-		log.Println(cmd)
-		switch cmd[0] {
-		case "PASS":
-			c.password = cmd[1]
-		case "NICK":
-			c.nickname = cmd[1]
-		case "USER":
-			c.username = cmd[1]
-		case "CAP":
-			if cmd[1] == "LS" {
-			}
-			if cmd[1] == "END" {
-				return
-			}
-		default:
-			return
-		}
-	}
-}
-
-func (s *server) sendWelcome(cl client) {
-	rplWelcome := "Your host is " + s.name + ", running version 1.0"
-	rplCreated := "This server was created at the beginning of time"
-	rplMyInfo := "Blah blah blah"
-	rplIsSupport := "Nothing is supported"
-	_, err := cl.clientWriter.Write([]byte(rplWelcome))
-	if err != nil {
-		log.Println(err)
-	}
-	_, err = cl.clientWriter.Write([]byte(rplCreated))
-	if err != nil {
-		log.Println(err)
-	}
-	_, err = cl.clientWriter.Write([]byte(rplMyInfo))
-	if err != nil {
-		log.Println(err)
-	}
-	_, err = cl.clientWriter.Write([]byte(rplIsSupport))
-	if err != nil {
-		log.Println(err)
-	}
-	return
-}
-
 // HandleConnections: Main life cycle for every client connection
 func (s *server) HandleConnection(c client) {
 	defer c.clientConnection.Close()
 	// defer fmt.Println("Connection closed with client.")
-
-	c.registerClient()
-	s.sendWelcome(c)
 
 	log.Println("Eternal conn loop")
 	for {
