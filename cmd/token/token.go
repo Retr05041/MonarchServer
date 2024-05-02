@@ -12,55 +12,26 @@ const (
 	ILLEGAL = "ILLEGAL" // tokens we don't know about
 	EOF     = "EOF"     // stop at end of file
 
-	// Identifiers + literals
-	IDENT = "IDENT" // add, foobar, x, y, ...
-	INT   = "INT"   // 1343456
+	// Keywords
+	COMMAND   = "COMMAND"
+	PREFIX    = "PREFIX"
+	PARAMETER = "PARAMETER"
 
 	// Operators
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
-	LT       = "<"
-	GT       = ">"
-	EQ       = "=="
-	NOT_EQ   = "!="
-
-	// Delimiters
-	COMMA     = ","
-	SEMICOLON = ";"
-	LPAREN    = "("
-	RPAREN    = ")"
-	LBRACE    = "{"
-	RBRACE    = "}"
-
-	// Keywords
-	FUNCTION = "FUNCTION"
-	LET      = "LET"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
+	COLON = ":"
 )
 
 // Table for mapping strings to token types
-var keywords = map[string]TokenType{
-	"fn":     FUNCTION,
-	"let":    LET,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
+var commands = map[string]TokenType{
+	"PASS": COMMAND,
+	"NICK": COMMAND,
+	"USER": COMMAND,
 }
 
 // takes a string to test and assigns it to a tokentype or returns a uesr-defined identifier
-func LookupIdent(ident string) TokenType {
-	if tok, ok := keywords[ident]; ok {
+func LookupCmd(cmd string) TokenType {
+	if tok, ok := commands[cmd]; ok {
 		return tok
 	}
-	return IDENT
+	return COMMAND
 }
