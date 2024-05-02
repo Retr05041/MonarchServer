@@ -7,18 +7,20 @@ import (
 	"log"
 	"net"
 	"strings"
-
 )
 
 // server: Struct for holding server info
 type server struct {
+	name string
 	// List of clients
 	clients []client
 }
 
 // client: Struct for holding client info
 type client struct {
-	username         string    // Clients given username for global communication
+	username         string // Clients given username for global communication
+	nickname         string
+	password         string
 	clientWriter     io.Writer // Uses conn as it's io.Writer
 	clientConnection net.Conn  // Connection interface
 }
@@ -28,31 +30,91 @@ func (s *server) addClient(c client) {
 	s.clients = append(s.clients, c)
 }
 
+func (c *client) readFromClient() string {
+	clientData, err := bufio.NewReader(c.clientConnection).ReadString('\n')
+	if err != nil {
+		log.Println(err)
+		return "EOF"
+	}
+
+	cleanedData := strings.TrimSpace(strings.TrimRight(string(clientData), "\n"))
+	return cleanedData
+}
+
+func (c *client) registerClient() {
+	log.Println("Entered registerClient")
+	for {
+		cmd := strings.Split(c.readFromClient(), " ")
+		log.Println(cmd)
+		switch cmd[0] {
+		case "PASS":
+			c.password = cmd[1]
+		case "NICK":
+			c.nickname = cmd[1]
+		case "USER":
+			c.username = cmd[1]
+		case "CAP":
+			if cmd[1] == "LS" {
+			}
+			if cmd[1] == "END" {
+				return
+			}
+		default:
+			return
+		}
+	}
+}
+
+func (s *server) sendWelcome(cl client) {
+	rplWelcome := "Your host is " + s.name + ", running version 1.0"
+	rplCreated := "This server was created at the beginning of time"
+	rplMyInfo := "Blah blah blah"
+	rplIsSupport := "Nothing is supported"
+	_, err := cl.clientWriter.Write([]byte(rplWelcome))
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = cl.clientWriter.Write([]byte(rplCreated))
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = cl.clientWriter.Write([]byte(rplMyInfo))
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = cl.clientWriter.Write([]byte(rplIsSupport))
+	if err != nil {
+		log.Println(err)
+	}
+	return
+}
 
 // HandleConnections: Main life cycle for every client connection
 func (s *server) HandleConnection(c client) {
 	defer c.clientConnection.Close()
 	// defer fmt.Println("Connection closed with client.")
 
-	for {
-		clientData, err := bufio.NewReader(c.clientConnection).ReadString('\n')
-		if err != nil {
-			log.Println(err)
-      return
-		}
+	c.registerClient()
+	s.sendWelcome(c)
 
-		cleanedData := strings.TrimSpace(strings.TrimRight(string(clientData), "\n"))
-		fmt.Println(cleanedData)
+	log.Println("Eternal conn loop")
+	for {
+		clientMsg := c.readFromClient()
+		if clientMsg != "EOF" {
+			log.Println(c.readFromClient())
+		} else {
+			return
+		}
 		// fmt.Println(cleanedData)
 
-    // Do something with the incoming command here...
+		// Do something with the incoming command here...
 	}
 }
 
-// main: Starts server and allows new connections to be made 
+// main: Starts server and allows new connections to be made
 func main() {
 	fmt.Println("Starting server...")
-	srv := &server{}
+	srv := &server{name: "TestServer"}
 
 	listener, err := net.Listen("tcp", ":6667")
 	if err != nil {
