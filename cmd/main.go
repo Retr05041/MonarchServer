@@ -1,6 +1,7 @@
 package main
 
 import (
+	"MonarchServer/cmd/message"
 	"bufio"
 	"fmt"
 	"log"
@@ -47,14 +48,13 @@ func (s *server) HandleConnection(c client) {
 	log.Println("Eternal conn loop")
 	for {
 		clientMsg := c.readFromClient()
-		if clientMsg != "EOF" {
-			log.Println(c.readFromClient())
-		} else {
+		if clientMsg == "EOF" {
 			return
 		}
 		// fmt.Println(cleanedData)
 
 		// Do something with the incoming command here...
+        log.Println(message.Parse(clientMsg))
 	}
 }
 
