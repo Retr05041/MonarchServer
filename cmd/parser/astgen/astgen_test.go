@@ -9,13 +9,16 @@ func TestString(t *testing.T) {
 	ast := &AST{
 		Nodes: []Node{
             &Prefix{
-                Token: tokenizer.Token{Type: tokenizer.WORD, Literal: "TestSource"},
+                Token: tokenizer.Token{Type: tokenizer.PREFIX, Literal: "TestSource"},
                 Value: "TestSource",
             },
             &Command{
-                Token: tokenizer.Token{Type: tokenizer.WORD, Literal: "PASS"},
+                Token: tokenizer.Token{Type: tokenizer.CMD, Literal: "PASS"},
                 Value: "PASS",
-                Params: []string{"supersecretpassword"},
+            },
+            &Parameter{
+                Token: tokenizer.Token{Type: tokenizer.PARAMETER, Literal: "supersecretpassword"},
+                Value: "supersecretpassword",
             },
 		},
 	}

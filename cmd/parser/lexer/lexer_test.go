@@ -5,7 +5,7 @@ import (
     "MonarchServer/cmd/parser/tokenizer"
 )
 
-func TestNextToken(t *testing.T) {
+func TestReadToken(t *testing.T) {
 	// Get an arbitrary input from the user
     input := `:TestSource PASS mysupersecretpassword`
 
@@ -17,9 +17,9 @@ func TestNextToken(t *testing.T) {
 	}{
 		// Expected Type and Literal to test against from input
         {tokenizer.COLON, ":"},
-		{tokenizer.WORD, "TestSource"},
-		{tokenizer.WORD, "PASS"},
-		{tokenizer.WORD, "mysupersecretpassword"},
+		{tokenizer.PREFIX, "TestSource"},
+		{tokenizer.CMD, "PASS"},
+		{tokenizer.PARAMETER, "mysupersecretpassword"},
 	}
 
 	l := New(input)

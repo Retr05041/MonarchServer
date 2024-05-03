@@ -21,22 +21,25 @@ func (p *Prefix) String() string       { return p.Value }
 type Command struct {
 	Token  tokenizer.Token
 	Value  string
-	Params []string
 }
 
 func (c *Command) TokenLiteral() string { return c.Token.Literal }
 func (c *Command) String() string {
 	var out bytes.Buffer
-
-	out.WriteString(" " + c.Value + " ")
-	for i, param := range c.Params {
-		out.WriteString(param)
-		if i != len(c.Params)-1 {
-			out.WriteString(" ")
-		}
-	}
-
+	out.WriteString(" " + c.Value)
 	return out.String()
+}
+
+type Parameter struct {
+    Token tokenizer.Token
+    Value string
+}
+
+func (par *Parameter) TokenLiteral() string { return par.Token.Literal }
+func (par *Parameter) String() string {
+    var out bytes.Buffer
+    out.WriteString(" " + par.Value)
+    return out.String()
 }
 
 // Root Node for every AST

@@ -7,6 +7,8 @@ type Lexer struct {
 	currCharIndex int
 	nextCharIndex int
 	char          byte
+	srcFlag       bool
+	cmdFlag       bool
 }
 
 func New(input string) *Lexer {
@@ -30,41 +32,38 @@ func (l *Lexer) ReadToken() tokenizer.Token {
 	// Create an uninitialised token
 	var currTok tokenizer.Token
 
-    l.skipWhitespace()
+	l.skipWhitespace()
 
 	// Depending on what the current ch from the lexers input, create a new token
 	switch l.char {
 	case ':':
-        currTok = newToken(tokenizer.COLON, l.char) 
-    case '!':
-        currTok = newToken(tokenizer.BANG, l.char)
-    case '@':
-        currTok = newToken(tokenizer.AT, l.char)
-    case '*':
-        currTok = newToken(tokenizer.STAR, l.char)
-    case '-':
-        currTok = newToken(tokenizer.DASH, l.char)
-    case '=':
-        currTok = newToken(tokenizer.EQUALS, l.char)
+		currTok = newToken(tokenizer.COLON, l.char)
+		l.srcFlag = true
+        l.slideRight()
+        return currTok
 	case 0:
 		currTok.Literal = ""
 		currTok.Type = tokenizer.EOF
 	default:
-        // At this point if it ain't a special char, its just gonna get filtered out
-		if isLetter(l.char) {
+		// At this point if it ain't a special char, its just gonna get filtered out
+		if isLetterOrDigit(l.char) {
 			currTok.Literal = l.readWords()
-			currTok.Type = tokenizer.WORD
-			return currTok
-		} else if isDigit(l.char) {
-			currTok.Literal = l.readNumber()
-			currTok.Type = tokenizer.WORD
+            if l.srcFlag {
+                currTok.Type = tokenizer.PREFIX
+                l.srcFlag = false
+                l.cmdFlag = true
+            } else if l.cmdFlag || l.currCharIndex == 0 {
+				currTok.Type = tokenizer.CMD
+                l.cmdFlag = false
+			} else {
+				currTok.Type = tokenizer.PARAMETER
+			}
 			return currTok
 		} else {
 			// If it's outside of ASCII (No unicode support)
 			currTok = newToken(tokenizer.ILLEGAL, l.char)
 		}
 	}
-
 	l.slideRight()
 	return currTok
 }
@@ -75,29 +74,17 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-func isLetter(ch byte) bool {
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
-}
-
-func isDigit(ch byte) bool {
-	return '0' <= ch && ch <= '9'
+func isLetterOrDigit(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || '0' <= ch && ch <= '9'
 }
 
 func (l *Lexer) readWords() string {
 	index := l.currCharIndex
-	for isLetter(l.char) {
+	for isLetterOrDigit(l.char) {
 		l.slideRight()
 	}
 	return l.input[index:l.currCharIndex]
 
-}
-
-func (l *Lexer) readNumber() string {
-	index := l.currCharIndex
-	for isDigit(l.char) {
-		l.slideRight()
-	}
-	return l.input[index:l.currCharIndex]
 }
 
 func newToken(tokenType tokenizer.TokenType, ch byte) tokenizer.Token {

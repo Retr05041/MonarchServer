@@ -9,12 +9,9 @@ type Token struct {
 
 const (
 	COLON  = ":"
-	BANG   = "!"
-	AT     = "@"
-	STAR   = "*"
-	DASH   = "-"
-	EQUALS = "="
     EOF = "EOF"
-    WORD = "WORD"
+    PARAMETER = "PARAMETER"
     ILLEGAL = "ILLEGAL"
+    CMD = "CMD"
+    PREFIX = "PREFIX"
 )
