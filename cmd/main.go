@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"strings"
@@ -18,11 +17,10 @@ type server struct {
 
 // client: Struct for holding client info
 type client struct {
-	username         string // Clients given username for global communication
-	nickname         string
-	password         string
-	clientWriter     io.Writer // Uses conn as it's io.Writer
-	clientConnection net.Conn  // Connection interface
+	username     string // Clients given username for global communication
+	nickname     string
+	password     string
+	socket       net.Conn  // Connection interface
 }
 
 // addClient: Add client to list of clients on server
@@ -31,7 +29,7 @@ func (s *server) addClient(c client) {
 }
 
 func (c *client) readFromClient() string {
-	clientData, err := bufio.NewReader(c.clientConnection).ReadString('\n')
+	clientData, err := bufio.NewReader(c.socket).ReadString('\n')
 	if err != nil {
 		log.Println(err)
 		return "EOF"
@@ -43,7 +41,7 @@ func (c *client) readFromClient() string {
 
 // HandleConnections: Main life cycle for every client connection
 func (s *server) HandleConnection(c client) {
-	defer c.clientConnection.Close()
+	defer c.socket.Close()
 	// defer fmt.Println("Connection closed with client.")
 
 	log.Println("Eternal conn loop")
@@ -62,8 +60,8 @@ func (s *server) HandleConnection(c client) {
 
 // main: Starts server and allows new connections to be made
 func main() {
-	fmt.Println("Starting server...")
 	srv := &server{name: "TestServer"}
+	fmt.Printf("Starting %s...\n", srv.name)
 
 	listener, err := net.Listen("tcp", ":6667")
 	if err != nil {
@@ -82,8 +80,7 @@ func main() {
 
 		// Create a client
 		newClient := client{
-			clientWriter:     conn,
-			clientConnection: conn,
+			socket: conn,
 		}
 
 		// fmt.Println("Connection made with client.")
